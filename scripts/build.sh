@@ -16,3 +16,12 @@ if [ ${#SOURCES[@]} -eq 0 ]; then
 	echo "Arquivos .c não encontrados. Fim do programa!"
 	exit 1
 fi
+
+mkdir -p "$SOURCE_DIR/build/"
+
+if ! gcc -I "$SOURCE_DIR/include" "${SOURCES[@]}" -o "$SOURCE_DIR/build/$EXEC_NAME"; then
+	echo "Erro de compilação. Fim do programa."
+	exit 1
+fi
+
+echo "Compilação feita com sucesso!"
