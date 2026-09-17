@@ -1,6 +1,13 @@
 #!/bin/bash
 
+source "$(dirname "${BASH_SOURCE[0]}")/lib/common.sh"
+
 comando="$1"
+if [ -z "$comando" ]; then
+  echo "comandos disponíveis: build, run, clean, rebuild, info"
+  exit 1
+fi
+
 shift
 
 case "$comando" in
