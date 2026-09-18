@@ -2,26 +2,56 @@
 
 source "$(dirname "${BASH_SOURCE[0]}")/../lib/common.sh"
 
+SECONDS=0
+
 argumento="$1"
 SOURCE_DIR="${argumento:-$(pwd)}"
 
-if ! command -v gcc > /dev/null 2>&1; then
-	echo "GCC não instalado. Fim do programa."
+if [ ! -d "$SOURCE_DIR" ]; then
+	echo "Diretório do projeto não encontrado: $SOURCE_DIR" >&2
 	exit 1
 fi
 
-mapfile -t SOURCES < <(find "$SOURCE_DIR" -name "*.c")
+if ! command -v gcc > /dev/null 2>&1; then
+	mensagem="GCC não instalado. Fim do programa!"
+	echo "$mensagem" >&2
+	log "build" "$SECONDS" 1 "$mensagem"
+	exit 1
+fi
+
+mapfile -t SOURCES < <(find "$SOURCE_DIR" \
+	\( -path "$SOURCE_DIR/build" -o -path "$SOURCE_DIR/logs" \) -prune -o \
+	-type f -name "*.c" -print)
 
 if [ ${#SOURCES[@]} -eq 0 ]; then
-	echo "Arquivos .c não encontrados. Fim do programa!"
+	mensagem="Arquivos .c não encontrados. Fim do programa!"
+	echo "$mensagem" >&2
+	log "build" "$SECONDS" 1 "$mensagem"
 	exit 1
 fi
 
-mkdir -p "$SOURCE_DIR/build/"
-
-if ! gcc -I "$SOURCE_DIR/include" "${SOURCES[@]}" -o "$SOURCE_DIR/build/$EXEC_NAME"; then
-	echo "Erro de compilação. Fim do programa."
+if ! mkdir -p "$SOURCE_DIR/build/" 2> /dev/null; then
+	mensagem="Não foi possível criar $SOURCE_DIR/build/. Fim do programa!"
+	echo "$mensagem" >&2
+	log "build" "$SECONDS" 1 "$mensagem"
 	exit 1
 fi
 
+erros=$(mktemp)
+gcc -I "$SOURCE_DIR/include" "${SOURCES[@]}" -o "$SOURCE_DIR/build/$EXEC_NAME" 2> "$erros"
+codigo=$?
+duracao=$SECONDS
+
+cat "$erros" >&2
+
+if [ "$codigo" -ne 0 ]; then
+	log "build" "$duracao" "$codigo" "$(cat "$erros")"
+	rm -f "$erros"
+	echo "Erro de compilação. Fim do programa!" >&2
+	exit "$codigo"
+fi
+
+rm -f "$erros"
+log "build" "$duracao" 0 ""
 echo "Compilação feita com sucesso!"
+exit 0
