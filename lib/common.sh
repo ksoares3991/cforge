@@ -21,7 +21,7 @@ log() {
 		return 1
 	fi
 
-	mensagem=$(echo "$mensagem" | tr '\n|' '  ')
+	mensagem=$(printf '%s' "$mensagem" | tr '\n|' '  ')
 
 	echo "$(date '+%Y-%m-%d|%H:%M:%S')|$comando|$duracao|$codigo|$mensagem" \
 		>> "$diretorio/logs/cbuild.log"
