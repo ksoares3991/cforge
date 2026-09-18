@@ -85,7 +85,7 @@ if [ -f "$EXEC_FILE" ]; then
 	if [ -r "$EXEC_FILE" ]; then
 		tamanho_executavel="$(wc -c < "$EXEC_FILE") bytes"
 	else
-		erro "ERRO: permissões insuficientes para ler o executável: $EXEC_FILE" 1
+		erro "ERRO: permissões insuficientes para ler o executável $EXEC_FILE" 1
 	fi
 else
 	tamanho_executavel="$INDISPONIVEL"
