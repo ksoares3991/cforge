@@ -28,6 +28,9 @@ SOURCE_DIR="${SOURCE_DIR:-$(pwd)}"
 log_debug "SOURCE_DIR=$SOURCE_DIR"
 log_debug "OPT_LEVEL=$OPT_LEVEL FORCE_REBUILD=$FORCE_REBUILD EXEC_NAME=$EXEC_NAME"
 
+log_debug "SOURCE_DIR=$SOURCE_DIR"
+log_debug "OPT_LEVEL=$OPT_LEVEL FORCE_REBUILD=$FORCE_REBUILD EXEC_NAME=$EXEC_NAME"
+
 if [ ! -d "$SOURCE_DIR" ]; then
     echo "Diretório do projeto não encontrado: $SOURCE_DIR" >&2
     exit 1
@@ -46,6 +49,8 @@ mapfile -t SOURCES < <(find "$SOURCE_DIR" \
 
 log_verbose "arquivos .c encontrados: ${#SOURCES[@]}"
 
+log_verbose "arquivos .c encontrados: ${#SOURCES[@]}"
+
 if [ ${#SOURCES[@]} -eq 0 ]; then
     mensagem="Arquivos .c não encontrados. Fim do programa!"
     echo "$mensagem" >&2
@@ -61,6 +66,9 @@ if ! mkdir -p "$SOURCE_DIR/build/" 2> /dev/null; then
 fi
 
 echo "compilando com nível de otimização -O${OPT_LEVEL}"
+log_verbose "diretório do projeto: $SOURCE_DIR"
+log_verbose "executável: $SOURCE_DIR/build/$EXEC_NAME"
+
 log_verbose "diretório do projeto: $SOURCE_DIR"
 log_verbose "executável: $SOURCE_DIR/build/$EXEC_NAME"
 
