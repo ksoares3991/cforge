@@ -3,9 +3,18 @@
 source "$(dirname "${BASH_SOURCE[0]}")/../lib/common.sh"
 
 SECONDS=0
+SOURCE_DIR=""
 
-argumento="$1"
-SOURCE_DIR="${argumento:-$(pwd)}"
+for arg in "$@"; do
+    case "$arg" in
+        --verbose) VERBOSE=1 ;;
+        --debug) DEBUG=1 ;;
+        --*) echo "erro: opção inválida: $arg" >&2; exit 1 ;;
+        *) [ -z "$SOURCE_DIR" ] && SOURCE_DIR="$arg" ;;
+    esac
+done
+
+SOURCE_DIR="${SOURCE_DIR:-$(pwd)}"
 
 EXEC_FILE="$SOURCE_DIR/build/$EXEC_NAME"
 
@@ -19,6 +28,8 @@ fi
 "$EXEC_FILE"
 codigo=$?
 duracao=$SECONDS
+
+date '+%Y-%m-%d %H:%M:%S' > "$SOURCE_DIR/build/.last_run" 2>/dev/null
 
 if [ "$codigo" -eq 0 ]; then
 	log "run" "$duracao" "$codigo" ""
