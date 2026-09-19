@@ -20,7 +20,13 @@ done
 
 SOURCE_DIR="${SOURCE_DIR:-$(pwd)}"
 
-"$SCRIPTS_DIR/clean.sh" "$@"
+comuns=()
+for arg in "$@"; do
+    case "$arg" in
+        --verbose|--debug) comuns+=("$arg") ;;
+    esac
+done
+"$SCRIPTS_DIR/clean.sh" "${comuns[@]}"
 codigo=$?
 
 if [ "$codigo" -ne 0 ]; then
