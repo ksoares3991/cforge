@@ -26,7 +26,7 @@ for arg in "$@"; do
         --verbose|--debug) comuns+=("$arg") ;;
     esac
 done
-"$SCRIPTS_DIR/clean.sh" "${comuns[@]}"
+"$SCRIPTS_DIR/clean.sh" "$SOURCE_DIR" "${comuns[@]}"
 codigo=$?
 
 if [ "$codigo" -ne 0 ]; then
