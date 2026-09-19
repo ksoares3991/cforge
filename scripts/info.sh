@@ -3,9 +3,20 @@
 source "$(dirname "${BASH_SOURCE[0]}")/../lib/common.sh"
 
 SECONDS=0
+SOURCE_DIR=""
+GERAR_RELATORIO=0
 
-argumento="$1"
-SOURCE_DIR="${argumento:-$(pwd)}"
+for arg in "$@"; do
+    case "$arg" in
+        --report) GERAR_RELATORIO=1 ;;
+        --verbose) VERBOSE=1 ;;
+        --debug) DEBUG=1 ;;
+        --*) echo "erro: opção inválida: $arg" >&2; exit 1 ;;
+        *) [ -z "$SOURCE_DIR" ] && SOURCE_DIR="$arg" ;;
+    esac
+done
+
+SOURCE_DIR="${SOURCE_DIR:-$(pwd)}"
 SOURCE_DIR="${SOURCE_DIR%/}"
 
 INDISPONIVEL="indisponível"
@@ -27,17 +38,14 @@ listar_fontes() {
 		-type f -name "*.$extensao" -print
 }
 
-contar_linhas() {
-	local total=0
-	local arquivo
-	local linhas
-	for arquivo in "$@"; do
-		if [ -r "$arquivo" ]; then
-			linhas=$(wc -l < "$arquivo")
-			total=$((total + linhas))
-		fi
-	done
-	echo "$total"
+contar_loc() {
+    local total=0 f n
+    for f in "$@"; do
+        n=$(grep -cve '^[[:space:]]*$' "$f" 2>/dev/null)
+        n=${n:-0}
+        total=$((total + n))
+    done
+    echo "$total"
 }
 
 data_ultima_operacao() {
@@ -79,7 +87,7 @@ while IFS= read -r arquivo; do
 done < <(listar_fontes h)
 
 total_arquivos=$(( ${#arquivos_c[@]} + ${#arquivos_h[@]} ))
-total_linhas=$(contar_linhas "${arquivos_c[@]}" "${arquivos_h[@]}")
+total_linhas=$(contar_loc "${arquivos_c[@]}" "${arquivos_h[@]}")
 
 if [ -f "$EXEC_FILE" ]; then
 	if [ -r "$EXEC_FILE" ]; then
@@ -103,6 +111,30 @@ echo "Executável: $EXEC_FILE"
 echo "Tamanho do executável: $tamanho_executavel"
 echo "Última compilação: $ultima_compilacao"
 echo "Última execução: $ultima_execucao"
+
+if [ "$GERAR_RELATORIO" -eq 1 ]; then
+    mkdir -p "$SOURCE_DIR/relatorios" 2>/dev/null
+    relatorio="$SOURCE_DIR/relatorios/relatorio.html"
+    cat > "$relatorio" <<EOF
+<!DOCTYPE html>
+<html lang="pt-br">
+<head><meta charset="utf-8"><title>Relatório cbuild</title></head>
+<body>
+<h1>Relatório do projeto</h1>
+<p>Gerado em: $(date '+%Y-%m-%d %H:%M:%S')</p>
+<ul>
+  <li>Arquivos .c: ${#arquivos_c[@]}</li>
+  <li>Arquivos .h: ${#arquivos_h[@]}</li>
+  <li>Linhas de código: $total_linhas</li>
+  <li>Tamanho do executável: $tamanho_executavel</li>
+  <li>Última compilação: $ultima_compilacao</li>
+  <li>Última execução: $ultima_execucao</li>
+</ul>
+</body>
+</html>
+EOF
+    echo "relatório gerado em: $relatorio"
+fi
 
 log "info" "$SECONDS" 0 ""
 exit 0
