@@ -3,9 +3,27 @@
 source "$(dirname "${BASH_SOURCE[0]}")/../lib/common.sh"
 
 SECONDS=0
+OPT_LEVEL=0
+FORCE_REBUILD=0
+SOURCE_DIR=""
 
-argumento="$1"
-SOURCE_DIR="${argumento:-$(pwd)}"
+for arg in "$@"; do
+    case "$arg" in
+        --opt=0|--opt=1|--opt=2) OPT_LEVEL="${arg#--opt=}" ;;
+        --opt=*)
+            echo "erro: nível de otimização inválido: '${arg#--opt=}' (use 0, 1 ou 2)" >&2
+            exit 1
+            ;;
+        --no-incremental) FORCE_REBUILD=1 ;;
+        --verbose) VERBOSE=1 ;;
+        --debug) DEBUG=1 ;;
+        --) ;;
+        --*) echo "erro: opção inválida: $arg" >&2; exit 1 ;;
+		*) [ -z "$SOURCE_DIR" ] && SOURCE_DIR="$arg" ;;
+    esac
+done
+
+SOURCE_DIR="${SOURCE_DIR:-$(pwd)}"
 
 if [ ! -d "$SOURCE_DIR" ]; then
 	echo "Diretório do projeto não encontrado: $SOURCE_DIR" >&2
@@ -37,8 +55,28 @@ if ! mkdir -p "$SOURCE_DIR/build/" 2> /dev/null; then
 	exit 1
 fi
 
+echo "compilando com nível de otimização -O${OPT_LEVEL}"
+
+NEEDS_BUILD=0
+if [ "$FORCE_REBUILD" -eq 1 ] || [ ! -f "$SOURCE_DIR/build/$EXEC_NAME" ]; then
+    NEEDS_BUILD=1
+else
+    for src in "${SOURCES[@]}"; do
+        if [ "$src" -nt "$SOURCE_DIR/build/$EXEC_NAME" ]; then
+            NEEDS_BUILD=1
+            break
+        fi
+    done
+fi
+
+if [ "$NEEDS_BUILD" -eq 0 ]; then
+    echo "nada a recompilar — executável está atualizado."
+    log "build" "$SECONDS" 0 ""
+    exit 0
+fi
+
 erros=$(mktemp)
-gcc -I "$SOURCE_DIR/include" "${SOURCES[@]}" -o "$SOURCE_DIR/build/$EXEC_NAME" 2> "$erros"
+gcc -O"${OPT_LEVEL}" -I "$SOURCE_DIR/include" "${SOURCES[@]}" -o "$SOURCE_DIR/build/$EXEC_NAME" 2> "$erros"
 codigo=$?
 duracao=$SECONDS
 
