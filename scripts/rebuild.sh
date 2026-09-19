@@ -5,9 +5,20 @@ source "$(dirname "${BASH_SOURCE[0]}")/../lib/common.sh"
 SCRIPTS_DIR="$(dirname "${BASH_SOURCE[0]}")"
 
 SECONDS=0
+SOURCE_DIR=""
 
-argumento="$1"
-SOURCE_DIR="${argumento:-$(pwd)}"
+for arg in "$@"; do
+    case "$arg" in
+        --opt=0|--opt=1|--opt=2) ;;
+        --no-incremental) ;;
+        --verbose) VERBOSE=1 ;;
+        --debug) DEBUG=1 ;;
+        --*) echo "erro: opção inválida: $arg" >&2; exit 1 ;;
+        *) [ -z "$SOURCE_DIR" ] && SOURCE_DIR="$arg" ;;
+    esac
+done
+
+SOURCE_DIR="${SOURCE_DIR:-$(pwd)}"
 
 "$SCRIPTS_DIR/clean.sh" "$@"
 codigo=$?
