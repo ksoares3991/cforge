@@ -8,6 +8,8 @@ if [ -f "$CONFIG_FILE" ]; then
 fi
 
 EXEC_NAME="${EXEC_NAME:-programa}"
+VERBOSE=0
+DEBUG=0
 
 log() {
 	local comando="$1"
@@ -25,4 +27,16 @@ log() {
 
 	echo "$(date '+%Y-%m-%d|%H:%M:%S')|$comando|$duracao|$codigo|$mensagem" \
 		>> "$diretorio/logs/cbuild.log"
+}
+
+log_verbose() {
+    if [ "$VERBOSE" -eq 1 ]; then
+        echo "[verbose] $*"
+    fi
+}
+
+log_debug() {
+    if [ "$DEBUG" -eq 1 ]; then
+        echo "[debug] $*" >&2
+    fi
 }
