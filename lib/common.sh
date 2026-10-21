@@ -12,21 +12,21 @@ VERBOSE=0
 DEBUG=0
 
 log() {
-	local comando="$1"
-	local duracao="$2"
-	local codigo="$3"
-	local mensagem="$4"
-	local diretorio="${SOURCE_DIR:-$(pwd)}"
+	local cmd="$1"
+	local duration="$2"
+	local code="$3"
+	local message="$4"
+	local dir="${SOURCE_DIR:-$(pwd)}"
 
-	if ! mkdir -p "$diretorio/logs" 2> /dev/null; then
-		echo "AVISO: não foi possível criar $diretorio/logs; a operação não está sendo registrada" >&2
+	if ! mkdir -p "$dir/logs" 2> /dev/null; then
+		echo "WARNING: could not create $dir/logs; operation will not be logged" >&2
 		return 1
 	fi
 
-	mensagem=$(printf '%s' "$mensagem" | tr '\n|' '  ')
+	message=$(printf '%s' "$message" | tr '\n|' '  ')
 
-	echo "$(date '+%Y-%m-%d|%H:%M:%S')|$comando|$duracao|$codigo|$mensagem" \
-		>> "$diretorio/logs/cbuild.log"
+	echo "$(date '+%Y-%m-%d|%H:%M:%S')|$cmd|$duration|$code|$message" \
+		>> "$dir/logs/cbuild.log"
 }
 
 log_verbose() {

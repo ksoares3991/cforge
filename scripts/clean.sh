@@ -9,7 +9,7 @@ for arg in "$@"; do
     case "$arg" in
         --verbose) VERBOSE=1 ;;
         --debug) DEBUG=1 ;;
-        --*) echo "erro: opção inválida: $arg" >&2; exit 1 ;;
+        --*) echo "error: invalid option: $arg" >&2; exit 1 ;;
         *) [ -z "$SOURCE_DIR" ] && SOURCE_DIR="$arg" ;;
     esac
 done
@@ -17,23 +17,23 @@ done
 SOURCE_DIR="${SOURCE_DIR:-$(pwd)}"
 
 if [ ! -d "$SOURCE_DIR" ]; then
-	echo "Diretório do projeto não encontrado: $SOURCE_DIR" >&2
+	echo "project directory not found: $SOURCE_DIR" >&2
 	exit 1
 fi
 
 if [ ! -d "$SOURCE_DIR/build" ]; then
-	echo "Nada a limpar: $SOURCE_DIR/build/ não existe."
+	echo "nothing to clean: $SOURCE_DIR/build/ does not exist."
 	log "clean" "$SECONDS" 0 ""
 	exit 0
 fi
 
 if ! rm -rf "$SOURCE_DIR/build" 2> /dev/null; then
-	mensagem="Não foi possível remover $SOURCE_DIR/build/. Fim do programa!"
-	echo "$mensagem" >&2
-	log "clean" "$SECONDS" 1 "$mensagem"
+	message="could not remove $SOURCE_DIR/build/. Aborting."
+	echo "$message" >&2
+	log "clean" "$SECONDS" 1 "$message"
 	exit 1
 fi
 
 log "clean" "$SECONDS" 0 ""
-echo "Limpeza feita com sucesso!"
+echo "clean successful!"
 exit 0

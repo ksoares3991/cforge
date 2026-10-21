@@ -13,37 +13,37 @@ for arg in "$@"; do
         --no-incremental) ;;
         --verbose) VERBOSE=1 ;;
         --debug) DEBUG=1 ;;
-        --*) echo "erro: opção inválida: $arg" >&2; exit 1 ;;
+        --*) echo "error: invalid option: $arg" >&2; exit 1 ;;
         *) [ -z "$SOURCE_DIR" ] && SOURCE_DIR="$arg" ;;
     esac
 done
 
 SOURCE_DIR="${SOURCE_DIR:-$(pwd)}"
 
-comuns=()
+common_flags=()
 for arg in "$@"; do
     case "$arg" in
-        --verbose|--debug) comuns+=("$arg") ;;
+        --verbose|--debug) common_flags+=("$arg") ;;
     esac
 done
-"$SCRIPTS_DIR/clean.sh" "$SOURCE_DIR" "${comuns[@]}"
-codigo=$?
+"$SCRIPTS_DIR/clean.sh" "$SOURCE_DIR" "${common_flags[@]}"
+code=$?
 
-if [ "$codigo" -ne 0 ]; then
-	mensagem="Limpeza falhou; compilação não executada."
-	echo "$mensagem" >&2
-	log "rebuild" "$SECONDS" "$codigo" "$mensagem"
-	exit "$codigo"
+if [ "$code" -ne 0 ]; then
+	message="clean step failed; build not executed."
+	echo "$message" >&2
+	log "rebuild" "$SECONDS" "$code" "$message"
+	exit "$code"
 fi
 
 "$SCRIPTS_DIR/build.sh" "$@"
-codigo=$?
-duracao=$SECONDS
+code=$?
+duration=$SECONDS
 
-if [ "$codigo" -eq 0 ]; then
-	log "rebuild" "$duracao" 0 ""
+if [ "$code" -eq 0 ]; then
+	log "rebuild" "$duration" 0 ""
 else
-	log "rebuild" "$duracao" "$codigo" "Compilação falhou durante o rebuild."
+	log "rebuild" "$duration" "$code" "build step failed during rebuild."
 fi
 
-exit "$codigo"
+exit "$code"
