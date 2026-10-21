@@ -7,7 +7,7 @@ if [ -f "$CONFIG_FILE" ]; then
 	source "$CONFIG_FILE"
 fi
 
-EXEC_NAME="${EXEC_NAME:-programa}"
+EXEC_NAME="${EXEC_NAME:-program}"
 VERBOSE=0
 DEBUG=0
 
